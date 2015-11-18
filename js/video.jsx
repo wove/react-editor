@@ -1,6 +1,5 @@
 var React = require('react');
 var TextField = require('material-ui/lib/text-field');
-var VideoIframe = require('./videoIframe');
 var parser = require('./videoURLParser');
 var Toolbar = require('material-ui/lib/toolbar/toolbar');
 var ToolbarGroup = require('material-ui/lib/toolbar/toolbar-group');

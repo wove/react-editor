@@ -25452,7 +25452,6 @@
 
 	var React = __webpack_require__(1);
 	var TextField = __webpack_require__(203);
-	var VideoIframe = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./videoIframe\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
 	var parser = __webpack_require__(653);
 	var Toolbar = __webpack_require__(208);
 	var ToolbarGroup = __webpack_require__(209);
