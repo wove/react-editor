@@ -1,6 +1,7 @@
 var React = require('react');
 var Block = require('./block');
 var SiteOptions = require('./SiteOptions');
+var parser = require('./videoURLParser');
 var blockComponentList = require('./blockComponentList');
 var csrftoken = require('./csrftoken');
 
@@ -25,6 +26,14 @@ module.exports = React.createClass({
                                 "content": "http://www.stuff.co.nz/content/dam/images/1/7/m/d/h/s/image.related.StuffLandscapeSixteenByNine.620x349.17md4l.png/1445465810580.png"
                             },
                             {
+                                "id": 6,
+                                "type": "Video",
+                                "content": {
+                                    "url": "http://vimeo.com/19339941",
+                                    "embedHTML": ""
+                                }
+                            },
+                            {
                                 "id": 4,
                                 "type": "Banner Image",
                                 "content": {
@@ -40,6 +49,12 @@ module.exports = React.createClass({
                 };
     },
     componentWillMount: function() {
+        for (var i in this.state.data.blocks) {
+            var block = this.state.data.blocks[i];
+            if (block.type === "Video") {
+                block.content.embedHTML = this.getEmbedHTML(block.content.url);
+            }
+        }
         this.updateBlockOrderIDs();
         this.collapseBlocks();
     },
@@ -111,6 +126,10 @@ module.exports = React.createClass({
         return newID;
     },
     handleBlockChange: function(block) {
+        if (this.state.data.blocks[block.orderID - 1].type === "Video") {
+            console.log('update video');
+            block.content.embedHTML = this.getEmbedHTML(block.content.url)
+        }
         this.state.data.blocks[block.orderID - 1].content = block.content;
         this.setState({data: this.state.data});
     },
@@ -154,5 +173,25 @@ module.exports = React.createClass({
         }
         block.newBlocksCollapsed = (!block.newBlocksCollapsed ? true : false);
         this.setState({data: this.state.data});
+    },
+    getEmbedHTML: function(url) {
+        var embedHTML;
+        try {
+            var videoProperties = parser.parse(url);
+            if (videoProperties.provider === "vimeo") {
+                embedHTML = '<iframe src=//player.vimeo.com/video/' +
+                            videoProperties.id +
+                            ' frameBorder="0" allowFullScreen></iframe>'
+            } else if (videoProperties.provider === "youtube") {
+                embedHTML = '<iframe src=//www.youtube.com/embed/' +
+                            videoProperties.id +
+                            '?modestbranding=1' +
+                            'rel=0' +
+                            ' frameBorder="0" allowFullScreen></iframe>'
+            }
+        } catch (err) {
+            // Error message here
+        }
+        return embedHTML;
     }
 });

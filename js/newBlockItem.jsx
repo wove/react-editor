@@ -24,6 +24,11 @@ module.exports = React.createClass({
         e.preventDefault();
         var type = this.props.blockType;
         var content = '';
+        if (type === "Video") {
+            content = {"url": '', "embedHTML": ''};
+        } else if (type === "Banner Image") {
+            content = {"imageURL": '', "overlayText": ''};
+        }
         this.props.onNewBlockClick({"type": type, "content": content}, this.props.parentBlockOrderID);
         return;
     },

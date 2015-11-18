@@ -1,3 +1,0 @@
-// Component List
-
-var blockComponentList = {};

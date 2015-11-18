@@ -19608,6 +19608,7 @@
 	var React = __webpack_require__(1);
 	var Block = __webpack_require__(159);
 	var SiteOptions = __webpack_require__(217);
+	var parser = __webpack_require__(653);
 	var blockComponentList = __webpack_require__(198);
 	var csrftoken = __webpack_require__(219);
 
@@ -19630,6 +19631,13 @@
 	                    "type": "Image",
 	                    "content": "http://www.stuff.co.nz/content/dam/images/1/7/m/d/h/s/image.related.StuffLandscapeSixteenByNine.620x349.17md4l.png/1445465810580.png"
 	                }, {
+	                    "id": 6,
+	                    "type": "Video",
+	                    "content": {
+	                        "url": "http://vimeo.com/19339941",
+	                        "embedHTML": ""
+	                    }
+	                }, {
 	                    "id": 4,
 	                    "type": "Banner Image",
 	                    "content": {
@@ -19644,6 +19652,12 @@
 	        };
 	    },
 	    componentWillMount: function componentWillMount() {
+	        for (var i in this.state.data.blocks) {
+	            var block = this.state.data.blocks[i];
+	            if (block.type === "Video") {
+	                block.content.embedHTML = this.getEmbedHTML(block.content.url);
+	            }
+	        }
 	        this.updateBlockOrderIDs();
 	        this.collapseBlocks();
 	    },
@@ -19714,6 +19728,10 @@
 	        return newID;
 	    },
 	    handleBlockChange: function handleBlockChange(block) {
+	        if (this.state.data.blocks[block.orderID - 1].type === "Video") {
+	            console.log('update video');
+	            block.content.embedHTML = this.getEmbedHTML(block.content.url);
+	        }
 	        this.state.data.blocks[block.orderID - 1].content = block.content;
 	        this.setState({ data: this.state.data });
 	    },
@@ -19757,6 +19775,20 @@
 	        }
 	        block.newBlocksCollapsed = !block.newBlocksCollapsed ? true : false;
 	        this.setState({ data: this.state.data });
+	    },
+	    getEmbedHTML: function getEmbedHTML(url) {
+	        var embedHTML;
+	        try {
+	            var videoProperties = parser.parse(url);
+	            if (videoProperties.provider === "vimeo") {
+	                embedHTML = '<iframe src=//player.vimeo.com/video/' + videoProperties.id + ' frameBorder="0" allowFullScreen></iframe>';
+	            } else if (videoProperties.provider === "youtube") {
+	                embedHTML = '<iframe src=//www.youtube.com/embed/' + videoProperties.id + '?modestbranding=1' + 'rel=0' + ' frameBorder="0" allowFullScreen></iframe>';
+	            }
+	        } catch (err) {
+	            // Error message here
+	        }
+	        return embedHTML;
 	    }
 	});
 
@@ -19775,6 +19807,7 @@
 	var Paragraph = __webpack_require__(211);
 	var Image = __webpack_require__(212);
 	var BannerImage = __webpack_require__(213);
+	var Video = __webpack_require__(220);
 	var BlockToolbar = __webpack_require__(216);
 	var blockComponentList = __webpack_require__(198);
 
@@ -23575,6 +23608,11 @@
 	        e.preventDefault();
 	        var type = this.props.blockType;
 	        var content = '';
+	        if (type === "Video") {
+	            content = { "url": '', "embedHTML": '' };
+	        } else if (type === "Banner Image") {
+	            content = { "imageURL": '', "overlayText": '' };
+	        }
 	        this.props.onNewBlockClick({ "type": type, "content": content }, this.props.parentBlockOrderID);
 	        return;
 	    }
@@ -25405,6 +25443,881 @@
 	}
 
 	module.exports = getCookie('csrftoken');
+
+/***/ },
+/* 220 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var TextField = __webpack_require__(203);
+	var VideoIframe = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./videoIframe\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var parser = __webpack_require__(653);
+	var Toolbar = __webpack_require__(208);
+	var ToolbarGroup = __webpack_require__(209);
+	var ToolbarTitle = __webpack_require__(210);
+	var FontIcon = __webpack_require__(196);
+	var Paper = __webpack_require__(160);
+	var blockComponentList = __webpack_require__(198);
+
+	module.exports = React.createClass({
+	    displayName: 'exports',
+
+	    render: function render() {
+	        return React.createElement(
+	            Paper,
+	            {
+	                style: {
+	                    marginTop: -10,
+	                    marginLeft: 5,
+	                    marginRight: 5,
+	                    paddingTop: 30,
+	                    paddingBottom: 30
+	                } },
+	            React.createElement(TextField, {
+	                floatingLabelText: 'Add your video URL here',
+	                multiLine: true,
+	                value: this.props.data.content.url,
+	                onChange: this.handleChange,
+	                style: {
+	                    paddingLeft: "24"
+	                } }),
+	            React.createElement('div', {
+	                className: 'videoWrapper',
+	                dangerouslySetInnerHTML: this.getIframeHTML() })
+	        );
+	    },
+	    handleChange: function handleChange(e) {
+	        var content = this.props.data.content;
+	        content.url = e.target.value;
+	        this.props.onBlockChange({ "orderID": this.props.data.orderID, "content": content });
+	    },
+	    getIframeHTML: function getIframeHTML() {
+	        return { __html: this.props.data.content.embedHTML };
+	    }
+	});
+
+	blockComponentList['Video'] = module.exports;
+
+/***/ },
+/* 221 */,
+/* 222 */,
+/* 223 */,
+/* 224 */,
+/* 225 */,
+/* 226 */,
+/* 227 */,
+/* 228 */,
+/* 229 */,
+/* 230 */,
+/* 231 */,
+/* 232 */,
+/* 233 */,
+/* 234 */,
+/* 235 */,
+/* 236 */,
+/* 237 */,
+/* 238 */,
+/* 239 */,
+/* 240 */,
+/* 241 */,
+/* 242 */,
+/* 243 */,
+/* 244 */,
+/* 245 */,
+/* 246 */,
+/* 247 */,
+/* 248 */,
+/* 249 */,
+/* 250 */,
+/* 251 */,
+/* 252 */,
+/* 253 */,
+/* 254 */,
+/* 255 */,
+/* 256 */,
+/* 257 */,
+/* 258 */,
+/* 259 */,
+/* 260 */,
+/* 261 */,
+/* 262 */,
+/* 263 */,
+/* 264 */,
+/* 265 */,
+/* 266 */,
+/* 267 */,
+/* 268 */,
+/* 269 */,
+/* 270 */,
+/* 271 */,
+/* 272 */,
+/* 273 */,
+/* 274 */,
+/* 275 */,
+/* 276 */,
+/* 277 */,
+/* 278 */,
+/* 279 */,
+/* 280 */,
+/* 281 */,
+/* 282 */,
+/* 283 */,
+/* 284 */,
+/* 285 */,
+/* 286 */,
+/* 287 */,
+/* 288 */,
+/* 289 */,
+/* 290 */,
+/* 291 */,
+/* 292 */,
+/* 293 */,
+/* 294 */,
+/* 295 */,
+/* 296 */,
+/* 297 */,
+/* 298 */,
+/* 299 */,
+/* 300 */,
+/* 301 */,
+/* 302 */,
+/* 303 */,
+/* 304 */,
+/* 305 */,
+/* 306 */,
+/* 307 */,
+/* 308 */,
+/* 309 */,
+/* 310 */,
+/* 311 */,
+/* 312 */,
+/* 313 */,
+/* 314 */,
+/* 315 */,
+/* 316 */,
+/* 317 */,
+/* 318 */,
+/* 319 */,
+/* 320 */,
+/* 321 */,
+/* 322 */,
+/* 323 */,
+/* 324 */,
+/* 325 */,
+/* 326 */,
+/* 327 */,
+/* 328 */,
+/* 329 */,
+/* 330 */,
+/* 331 */,
+/* 332 */,
+/* 333 */,
+/* 334 */,
+/* 335 */,
+/* 336 */,
+/* 337 */,
+/* 338 */,
+/* 339 */,
+/* 340 */,
+/* 341 */,
+/* 342 */,
+/* 343 */,
+/* 344 */,
+/* 345 */,
+/* 346 */,
+/* 347 */,
+/* 348 */,
+/* 349 */,
+/* 350 */,
+/* 351 */,
+/* 352 */,
+/* 353 */,
+/* 354 */,
+/* 355 */,
+/* 356 */,
+/* 357 */,
+/* 358 */,
+/* 359 */,
+/* 360 */,
+/* 361 */,
+/* 362 */,
+/* 363 */,
+/* 364 */,
+/* 365 */,
+/* 366 */,
+/* 367 */,
+/* 368 */,
+/* 369 */,
+/* 370 */,
+/* 371 */,
+/* 372 */,
+/* 373 */,
+/* 374 */,
+/* 375 */,
+/* 376 */,
+/* 377 */,
+/* 378 */,
+/* 379 */,
+/* 380 */,
+/* 381 */,
+/* 382 */,
+/* 383 */,
+/* 384 */,
+/* 385 */,
+/* 386 */,
+/* 387 */,
+/* 388 */,
+/* 389 */,
+/* 390 */,
+/* 391 */,
+/* 392 */,
+/* 393 */,
+/* 394 */,
+/* 395 */,
+/* 396 */,
+/* 397 */,
+/* 398 */,
+/* 399 */,
+/* 400 */,
+/* 401 */,
+/* 402 */,
+/* 403 */,
+/* 404 */,
+/* 405 */,
+/* 406 */,
+/* 407 */,
+/* 408 */,
+/* 409 */,
+/* 410 */,
+/* 411 */,
+/* 412 */,
+/* 413 */,
+/* 414 */,
+/* 415 */,
+/* 416 */,
+/* 417 */,
+/* 418 */,
+/* 419 */,
+/* 420 */,
+/* 421 */,
+/* 422 */,
+/* 423 */,
+/* 424 */,
+/* 425 */,
+/* 426 */,
+/* 427 */,
+/* 428 */,
+/* 429 */,
+/* 430 */,
+/* 431 */,
+/* 432 */,
+/* 433 */,
+/* 434 */,
+/* 435 */,
+/* 436 */,
+/* 437 */,
+/* 438 */,
+/* 439 */,
+/* 440 */,
+/* 441 */,
+/* 442 */,
+/* 443 */,
+/* 444 */,
+/* 445 */,
+/* 446 */,
+/* 447 */,
+/* 448 */,
+/* 449 */,
+/* 450 */,
+/* 451 */,
+/* 452 */,
+/* 453 */,
+/* 454 */,
+/* 455 */,
+/* 456 */,
+/* 457 */,
+/* 458 */,
+/* 459 */,
+/* 460 */,
+/* 461 */,
+/* 462 */,
+/* 463 */,
+/* 464 */,
+/* 465 */,
+/* 466 */,
+/* 467 */,
+/* 468 */,
+/* 469 */,
+/* 470 */,
+/* 471 */,
+/* 472 */,
+/* 473 */,
+/* 474 */,
+/* 475 */,
+/* 476 */,
+/* 477 */,
+/* 478 */,
+/* 479 */,
+/* 480 */,
+/* 481 */,
+/* 482 */,
+/* 483 */,
+/* 484 */,
+/* 485 */,
+/* 486 */,
+/* 487 */,
+/* 488 */,
+/* 489 */,
+/* 490 */,
+/* 491 */,
+/* 492 */,
+/* 493 */,
+/* 494 */,
+/* 495 */,
+/* 496 */,
+/* 497 */,
+/* 498 */,
+/* 499 */,
+/* 500 */,
+/* 501 */,
+/* 502 */,
+/* 503 */,
+/* 504 */,
+/* 505 */,
+/* 506 */,
+/* 507 */,
+/* 508 */,
+/* 509 */,
+/* 510 */,
+/* 511 */,
+/* 512 */,
+/* 513 */,
+/* 514 */,
+/* 515 */,
+/* 516 */,
+/* 517 */,
+/* 518 */,
+/* 519 */,
+/* 520 */,
+/* 521 */,
+/* 522 */,
+/* 523 */,
+/* 524 */,
+/* 525 */,
+/* 526 */,
+/* 527 */,
+/* 528 */,
+/* 529 */,
+/* 530 */,
+/* 531 */,
+/* 532 */,
+/* 533 */,
+/* 534 */,
+/* 535 */,
+/* 536 */,
+/* 537 */,
+/* 538 */,
+/* 539 */,
+/* 540 */,
+/* 541 */,
+/* 542 */,
+/* 543 */,
+/* 544 */,
+/* 545 */,
+/* 546 */,
+/* 547 */,
+/* 548 */,
+/* 549 */,
+/* 550 */,
+/* 551 */,
+/* 552 */,
+/* 553 */,
+/* 554 */,
+/* 555 */,
+/* 556 */,
+/* 557 */,
+/* 558 */,
+/* 559 */,
+/* 560 */,
+/* 561 */,
+/* 562 */,
+/* 563 */,
+/* 564 */,
+/* 565 */,
+/* 566 */,
+/* 567 */,
+/* 568 */,
+/* 569 */,
+/* 570 */,
+/* 571 */,
+/* 572 */,
+/* 573 */,
+/* 574 */,
+/* 575 */,
+/* 576 */,
+/* 577 */,
+/* 578 */,
+/* 579 */,
+/* 580 */,
+/* 581 */,
+/* 582 */,
+/* 583 */,
+/* 584 */,
+/* 585 */,
+/* 586 */,
+/* 587 */,
+/* 588 */,
+/* 589 */,
+/* 590 */,
+/* 591 */,
+/* 592 */,
+/* 593 */,
+/* 594 */,
+/* 595 */,
+/* 596 */,
+/* 597 */,
+/* 598 */,
+/* 599 */,
+/* 600 */,
+/* 601 */,
+/* 602 */,
+/* 603 */,
+/* 604 */,
+/* 605 */,
+/* 606 */,
+/* 607 */,
+/* 608 */,
+/* 609 */,
+/* 610 */,
+/* 611 */,
+/* 612 */,
+/* 613 */,
+/* 614 */,
+/* 615 */,
+/* 616 */,
+/* 617 */,
+/* 618 */,
+/* 619 */,
+/* 620 */,
+/* 621 */,
+/* 622 */,
+/* 623 */,
+/* 624 */,
+/* 625 */,
+/* 626 */,
+/* 627 */,
+/* 628 */,
+/* 629 */,
+/* 630 */,
+/* 631 */,
+/* 632 */,
+/* 633 */,
+/* 634 */,
+/* 635 */,
+/* 636 */,
+/* 637 */,
+/* 638 */,
+/* 639 */,
+/* 640 */,
+/* 641 */,
+/* 642 */,
+/* 643 */,
+/* 644 */,
+/* 645 */,
+/* 646 */,
+/* 647 */,
+/* 648 */,
+/* 649 */,
+/* 650 */,
+/* 651 */,
+/* 652 */,
+/* 653 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	function URLParser() {
+	  "use strict";
+	  this.plugins = {};
+	}
+	URLParser.prototype.parse = function (url) {
+	  "use strict";
+	  var th = this,
+	      match = url.match(/(?:(?:https?:)?\/\/)?(?:[^\.]+\.)?(\w+)\./i),
+	      provider = match ? match[1] : undefined,
+	      result;
+	  if (match && provider && th.plugins[provider] && th.plugins[provider].parse) {
+	    result = th.plugins[provider].parse.call(this, url, getQueryParams(url));
+	    if (result) {
+	      if (result.params && Object.keys(result.params).length === 0) {
+	        delete result.params;
+	      }
+	      result.provider = th.plugins[provider].provider;
+	      return result;
+	    }
+	  }
+	  return undefined;
+	};
+	URLParser.prototype.bind = function (plugin) {
+	  "use strict";
+	  var th = this;
+	  th.plugins[plugin.provider] = plugin;
+	  if (plugin.alternatives) {
+	    for (var i = 0; i < plugin.alternatives.length; i += 1) {
+	      th.plugins[plugin.alternatives[i]] = plugin;
+	    }
+	  }
+	};
+	URLParser.prototype.create = function (op) {
+	  "use strict";
+	  var th = this,
+	      vi = op.videoInfo,
+	      params = op.params,
+	      plugin = th.plugins[vi.provider];
+
+	  params = params === 'internal' ? vi.params : params || {};
+
+	  if (plugin) {
+	    op.format = op.format || plugin.defaultFormat;
+	    if (plugin.formats.hasOwnProperty(op.format)) {
+	      return plugin.formats[op.format](vi, cloneObject(params));
+	    }
+	  }
+	  return undefined;
+	};
+	/*jshint unused:true */
+	var urlParser = new URLParser();
+	/*jshint unused:false */
+
+	/*jshint unused:false */
+	function cloneObject(obj) {
+	  /*jshint unused:true */
+	  "use strict";
+	  if (obj === null || typeof obj !== 'object') {
+	    return obj;
+	  }
+
+	  var temp = obj.constructor(); // give temp the original obj's constructor
+	  for (var key in obj) {
+	    temp[key] = cloneObject(obj[key]);
+	  }
+
+	  return temp;
+	}
+
+	//http://stackoverflow.com/a/1099670
+	/*jshint unused:false */
+	function getQueryParams(qs) {
+	  /*jshint unused:true */
+	  "use strict";
+	  qs = qs.split("+").join(" ");
+
+	  var params = {},
+	      tokens,
+	      re = /[\?#&]([^=]+)=([^&#]*)/g;
+
+	  while (tokens = re.exec(qs)) {
+	    params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+	  }
+
+	  return params;
+	}
+
+	/*jshint unused:false */
+	function combineParams(op) {
+	  /*jshint unused:true */
+	  "use strict";
+	  var combined = '',
+	      i = 0,
+	      keys = Object.keys(op.params);
+
+	  if (keys.length === 0) {
+	    return '';
+	  }
+
+	  //always have parameters in the same order
+	  keys.sort();
+
+	  if (!op.hasParams) {
+	    combined += '?' + keys[0] + '=' + op.params[keys[0]];
+	    i += 1;
+	  }
+
+	  for (; i < keys.length; i += 1) {
+	    combined += '&' + keys[i] + '=' + op.params[keys[i]];
+	  }
+	  return combined;
+	}
+
+	//parses strings like 1h30m20s to seconds
+	/*jshint unused:false */
+	function getTime(timeString) {
+	  /*jshint unused:true */
+	  "use strict";
+	  var totalSeconds = 0,
+	      timeValues = {
+	    's': 1,
+	    'm': 1 * 60,
+	    'h': 1 * 60 * 60,
+	    'd': 1 * 60 * 60 * 24,
+	    'w': 1 * 60 * 60 * 24 * 7
+	  },
+	      timePairs;
+
+	  //is the format 1h30m20s etc
+	  if (!timeString.match(/^(\d+[smhdw]?)+$/)) {
+	    return 0;
+	  }
+	  //expand to "1 h 30 m 20 s" and split
+	  timeString = timeString.replace(/([smhdw])/g, ' $1 ').trim();
+	  timePairs = timeString.split(' ');
+
+	  for (var i = 0; i < timePairs.length; i += 2) {
+	    totalSeconds += parseInt(timePairs[i], 10) * timeValues[timePairs[i + 1] || 's'];
+	  }
+	  return totalSeconds;
+	}
+
+	urlParser.bind({
+	  'provider': 'dailymotion',
+	  'alternatives': ['dai'],
+	  'parse': function parse(url, params) {
+	    "use strict";
+	    var match,
+	        id,
+	        result = {
+	      params: params
+	    };
+
+	    match = url.match(/(?:\/video|ly)\/([A-Za-z0-9]+)/i);
+	    id = match ? match[1] : undefined;
+
+	    if (params.hasOwnProperty('start')) {
+	      params.start = getTime(params.start);
+	    }
+
+	    if (!id) {
+	      return undefined;
+	    }
+	    result.mediaType = 'video';
+	    result.id = id;
+
+	    return result;
+	  },
+	  defaultFormat: 'long',
+	  formats: {
+	    short: function short(vi) {
+	      "use strict";
+	      return 'https://dai.ly/' + vi.id;
+	    },
+	    long: function long(vi, params) {
+	      "use strict";
+	      return 'https://dailymotion.com/video/' + vi.id + combineParams({
+	        params: params
+	      });
+	    },
+	    embed: function embed(vi, params) {
+	      "use strict";
+	      return '//www.dailymotion.com/embed/video/' + vi.id + combineParams({
+	        params: params
+	      });
+	    }
+	  }
+	  //
+	});
+
+	urlParser.bind({
+	  'provider': 'twitch',
+	  'parse': function parse(url, params) {
+	    "use strict";
+	    var match,
+	        id,
+	        channel,
+	        idPrefix,
+	        result = {};
+
+	    match = url.match(/twitch\.tv\/(\w+)(?:\/(.)\/(\d+))?/i);
+	    channel = match ? match[1] : undefined;
+	    idPrefix = match ? match[2] : undefined;
+	    id = match ? match[3] : undefined;
+
+	    channel = params.channel || params.utm_content || channel;
+
+	    if (!channel) {
+	      return undefined;
+	    }
+	    if (id) {
+	      result.mediaType = 'video';
+	      result.id = id;
+	      result.idPrefix = idPrefix;
+	    } else {
+	      result.mediaType = 'stream';
+	    }
+	    result.channel = channel;
+
+	    return result;
+	  },
+	  defaultFormat: 'long',
+	  formats: {
+	    long: function long(vi, params) {
+	      "use strict";
+	      var url = '';
+	      if (vi.mediaType === 'stream') {
+	        url = 'https://twitch.tv/' + vi.channel;
+	      } else if (vi.mediaType === 'video') {
+	        url = 'https://twitch.tv/' + vi.channel + '/' + vi.idPrefix + '/' + vi.id;
+	      }
+	      url += combineParams({
+	        params: params
+	      });
+
+	      return url;
+	    },
+	    embed: function embed(vi, params) {
+	      "use strict";
+	      return '//www.twitch.tv/' + vi.channel + '/embed' + combineParams({
+	        params: params
+	      });
+	    }
+	  }
+	});
+
+	urlParser.bind({
+	  provider: 'vimeo',
+	  alternatives: ['vimeopro'],
+	  parse: function parse(url) {
+	    "use strict";
+	    var match, id;
+	    match = url.match(/(?:\/(?:channels\/[\w]+|(?:album\/\d+\/)?videos?))?\/(\d+)/i);
+	    id = match ? match[1] : undefined;
+	    if (!id) {
+	      return undefined;
+	    }
+	    return {
+	      'mediaType': 'video',
+	      'id': id
+	    };
+	  },
+	  defaultFormat: 'long',
+	  formats: {
+	    long: function long(vi, params) {
+	      "use strict";
+	      return 'https://vimeo.com/' + vi.id + combineParams({ params: params });
+	    },
+	    embed: function embed(vi, params) {
+	      "use strict";
+	      return '//player.vimeo.com/video/' + vi.id + combineParams({ params: params });
+	    }
+	  }
+	});
+
+	urlParser.bind({
+	  'provider': 'youtube',
+	  'alternatives': ['youtu'],
+	  'parse': function parse(url, params) {
+	    "use strict";
+	    var match,
+	        id,
+	        list,
+	        result = {
+	      params: params
+	    };
+
+	    match = url.match(/(?:(?:v|be|videos|embed)\/(?!videoseries)|v=)([\w\-]{11})/i);
+	    id = match ? match[1] : undefined;
+	    if (params.v === id) {
+	      delete params.v;
+	    }
+
+	    if (params.list === id) {
+	      delete params.list;
+	    } else {
+	      list = params.list;
+	    }
+
+	    if (params.hasOwnProperty('start')) {
+	      params.start = getTime(params.start);
+	    }
+	    if (params.hasOwnProperty('t')) {
+	      params.start = getTime(params.t);
+	      delete params.t;
+	    }
+
+	    if (id) {
+	      result.mediaType = 'video';
+	      result.id = id;
+	      if (list) {
+	        result.list = list;
+	      }
+	    } else if (list) {
+	      result.mediaType = 'playlist';
+	      result.list = list;
+	    } else {
+	      return undefined;
+	    }
+
+	    return result;
+	  },
+	  defaultFormat: 'long',
+	  formats: {
+	    short: function short(vi, params) {
+	      "use strict";
+	      var url = 'https://youtu.be/' + vi.id;
+	      if (params.start) {
+	        url += '#t=' + params.start;
+	      }
+	      return url;
+	    },
+	    embed: function embed(vi, params) {
+	      "use strict";
+	      var url = '//youtube.com/embed';
+
+	      if (vi.mediaType === 'playlist') {
+	        params.listType = 'playlist';
+	      } else {
+	        url += '/' + vi.id;
+	        //loop hack
+	        if (params.loop == 1) {
+	          params.playlist = vi.id;
+	        }
+	      }
+
+	      url += combineParams({
+	        params: params
+	      });
+
+	      return url;
+	    },
+	    long: function long(vi, params) {
+	      "use strict";
+	      var url = '',
+	          startTime = params.start;
+	      delete params.start;
+
+	      if (vi.mediaType === 'playlist') {
+	        params.feature = 'share';
+	        url += 'https://youtube.com/playlist';
+	      } else {
+	        params.v = vi.id;
+	        url += 'https://youtube.com/watch';
+	      }
+
+	      url += combineParams({
+	        params: params
+	      });
+
+	      if (vi.mediaType !== 'playlist' && startTime) {
+	        url += '#t=' + startTime;
+	      }
+	      return url;
+	    },
+	    'default': 'long'
+	  }
+	});
+
+	module.exports = urlParser;
 
 /***/ }
 /******/ ]);

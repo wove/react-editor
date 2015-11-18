@@ -7,6 +7,7 @@ var Heading = require('./heading');
 var Paragraph = require('./paragraph');
 var Image = require('./image');
 var BannerImage = require('./bannerImage');
+var Video = require('./video');
 var BlockToolbar = require('./blockToolbar');
 var blockComponentList = require('./blockComponentList');
 
